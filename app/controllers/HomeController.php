@@ -10,7 +10,6 @@ class HomeController extends Controller {
     public function index(){
         // Index
         $this->data['body'] = 'welcome';
-        //$this->data['pageTitle'] = 'Trang chủ';
         $this->data['dataView']['pageTitle'] = 'Trang chủ';
         $this->render('layouts/layout', $this->data);
     }
