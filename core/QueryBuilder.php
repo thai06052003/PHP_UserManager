@@ -72,7 +72,6 @@ trait QueryBuilder
         else {
             $this->orderBy = "ORDER BY $field $type";
         }
-        echo $this->orderBy;
         return $this;
     }
     // Inner join
@@ -86,7 +85,6 @@ trait QueryBuilder
         $sqlQuery = "SELECT $this->selectField FROM $this->tableName $this->innerJoin $this->where $this->orderBy $this->limit";
         $sqlQuery = trim($sqlQuery);
         $query = $this->query($sqlQuery);
-        //echo $sqlQuery;
 
         // Reset field
         $this->reserQuery();
