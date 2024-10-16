@@ -1,13 +1,16 @@
 <?php
-// {modelName} Model
-class {modelName} extends Model{
+// Group Model
+class Group extends Model{
     public function tableFill() {
-        return 'table_here';
+        return 'groups';
     }
     public function fieldFill() {
         return '*';
     }
     public function primaryKey() {
         return 'id';
+    }
+    public function getGroup() {
+        return $this->all();
     }
 }

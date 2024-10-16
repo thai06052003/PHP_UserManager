@@ -30,7 +30,6 @@ class Request
         if ($this->isGet()) {
             // Lấy dữ liệu với phương thức get
             if (!empty($_GET)) {
-                echo 'get';
                 foreach ($_GET as $key => $value) {
                     if (is_array($value)) {
                         $dataFields[$key] = filter_input(INPUT_GET, $key, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_REQUIRE_ARRAY);
@@ -126,7 +125,6 @@ class Request
                                 if (!empty($rulesArr[3]) && preg_match('~.+?\=.+?~is',$rulesArr[3])) {
                                     $conditionWhere = $rulesArr[3];
                                     $conditionWhere = str_replace('=', '<>', $conditionWhere);
-                                    //echo $conditionWhere;
                                     $checkExist = $this->db->query("SELECT $fieldCheck FROM $tableName WHERE $fieldCheck = 'trim($dataFields[$fieldName])' AND $conditionWhere")->rowCount();
                                 }
                             }
