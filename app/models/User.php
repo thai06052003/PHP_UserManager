@@ -11,7 +11,6 @@ class User extends Model{
         return 'id';
     }
     function getUser($filters = [], $keyword = '') {
-        echo $keyword;
         $users = $this->db
             ->table($this->tableFill())
             ->select('users.*, groups.name as group_name')
@@ -23,7 +22,11 @@ class User extends Model{
             }
         }
         if (!empty($keyword)) {
-            $users->whereLike('users.name', "%$keyword%");
+            $users->where(function ($query) use ($keyword) {
+                $query
+                ->where('users.name', 'LIKE',"%$keyword%")
+                ->orWhere('users.email', 'LIKE',"%$keyword%");
+            });
         }
         $users = $users->get();
         

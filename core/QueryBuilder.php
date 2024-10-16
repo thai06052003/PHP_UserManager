@@ -15,27 +15,43 @@ trait QueryBuilder
         return $this;
     }
     //
-    function where($field, $compare, $value)
+    function where($field, $compare = null, $value = null)
     {
-        if (empty($this->where)) {
-            $this->operator = ' WHERE ';
+        if ($field instanceof \Closure) {
+            $callback = $field;
+            $this->where .= '(';
+            call_user_func_array($callback, [$this]);
+            $this->where .= ')';
         } else {
-            $this->operator = ' AND ';
+            if (empty($this->where)) {
+                $this->operator = ' WHERE ';
+            } else {
+                $this->operator = ' AND ';
+            }
+            $this->where .= "$this->operator $field $compare '$value'";
+            $this->where = str_replace('( AND', ' AND (', $this->where);
         }
-
-        $this->where .= "$this->operator $field $compare '$value'";
         return $this;
     }
     //
     public function orWhere($field, $compare, $value)
     {
-        if (empty($this->where)) {
-            $this->operator = ' WHERE ';
+        if ($field instanceof \Closure) {
+            $callback = $field;
+            $this->where .= '(';
+            call_user_func_array($callback, [$this]);
+            $this->where .= ')';
         } else {
-            $this->operator = ' OR ';
+            if (empty($this->where)) {
+                $this->operator = ' WHERE ';
+            } else {
+                $this->operator = ' OR ';
+            }
+
+            $this->where .= "$this->operator $field $compare '$value'";
+            $this->where = str_replace('( OR', ' OR (', $this->where);
         }
 
-        $this->where .= "$this->operator $field $compare '$value'";
         return $this;
     }
     //
@@ -63,19 +79,20 @@ trait QueryBuilder
         return $this;
     }
     //
-    function orderBy($field, $type='ASC') {
+    function orderBy($field, $type = 'ASC')
+    {
         $fieldArr = array_filter(explode(',', $field));
-        if (!empty($fieldArr) && count($fieldArr)>=2) {
+        if (!empty($fieldArr) && count($fieldArr) >= 2) {
             // SQL order by multi
-            $this->orderBy = "ORDER BY ".implode(',  ', $fieldArr);
-        }
-        else {
+            $this->orderBy = "ORDER BY " . implode(',  ', $fieldArr);
+        } else {
             $this->orderBy = "ORDER BY $field $type";
         }
         return $this;
     }
     // Inner join
-    function join ($tableName, $relationShip) {
+    function join($tableName, $relationShip)
+    {
         $this->innerJoin .= " INNER JOIN $tableName ON $relationShip ";
         return $this;
     }
@@ -95,17 +112,20 @@ trait QueryBuilder
         return false;
     }
     // Insert
-    function insert($data) {
+    function insert($data)
+    {
         $tableName = $this->tableName;
         $insertStatus = $this->insertData($tableName, $data);
         return $insertStatus;
     }
     // Last id
-    function lastId() {
+    function lastId()
+    {
         return $this->lastInsertId();
     }
     // Update
-    function update($data) {
+    function update($data)
+    {
         $whereUpdate = str_replace('WHERE', '', $this->where);
         $whereUpdate = trim($whereUpdate);
         $tableName = $this->tableName;
@@ -113,7 +133,8 @@ trait QueryBuilder
         return $statusUpdate;
     }
     // Delete
-    function delete() {
+    function delete()
+    {
         $whereDelete = str_replace('WHERE', '', $this->where);
         $whereDelete = trim($whereDelete);
         $tableName = $this->tableName;
