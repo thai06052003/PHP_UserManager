@@ -23,21 +23,23 @@ class UserController extends Controller {
 
         if (!empty($query)) {
             extract($query);
-            if ($status == 'active' || $status == 'inactive') {
+
+            if (!empty($status) && ($status == 'active' || $status == 'inactive')) {
                 $filters['status'] = $status == 'active' ? 1 : 0;
             }
-            if ($group_id) {
+            if (!empty($group_id)) {
                 $filters['group_id'] = $group_id;
             }
-            /* echo '<pre>';
-            print_r($filters);
-            echo '</pre>'; */
         }
 
-        $users = $this->userModel->getUser($filters, $keyword ?? '');
+        $userPaginate = $this->userModel->getUser($filters, $keyword ?? '');
+        $users = $userPaginate['data'];
+        $links = $userPaginate['link'];
+
         $groups = $this->groupModel->getGroup();
 
         $this->data['dataView']['users'] = $users;
+        $this->data['dataView']['links'] = $links;
         $this->data['dataView']['groups'] = $groups;
         $this->data['dataView']['request'] = $request;
 

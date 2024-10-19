@@ -169,7 +169,6 @@ class Request
                     $errorsArr[$key] = reset($error);
                 }
                 return $errorsArr;
-                //return $this->__errors;
             }
             return reset($this->__errors[$fieldName]);
         }

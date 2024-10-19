@@ -28,7 +28,7 @@ class User extends Model{
                 ->orWhere('users.email', 'LIKE',"%$keyword%");
             });
         }
-        $users = $users->get();
+        $users = $users->paginate(6);
         
         return $users;
     }

@@ -81,14 +81,6 @@
         <button class="btn btn-danger disabled">Xóa đã chọn (0)</button>
     </div>
     <div class="col-6">
-        <nav class="d-flex justify-content-end pagination-sm">
-            <ul class="pagination">
-                <li class="page-item"><a class="page-link" href="#">Trước</a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">Sau</a></li>
-            </ul>
-        </nav>
+        {! $links !}
     </div>
 </div>

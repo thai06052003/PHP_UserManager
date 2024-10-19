@@ -8,6 +8,8 @@ trait QueryBuilder
     public $limit = '';
     public $orderBy = '';
     public $innerJoin = '';
+    private $sqlPaginate = '';
+    private $resetQuery = true;
     //
     function table($tableName)
     {
@@ -90,6 +92,56 @@ trait QueryBuilder
         }
         return $this;
     }
+
+    function paginate($limit, $isQuery = true)
+    {
+        $request = new Request();
+        $field = $request->getFields();
+        $page = !empty($field['page']) && $field['page'] > 0 ? $field['page'] : 1;
+        $offset = ($page - 1) * $limit;
+        $this->resetQuery = false;
+        $result = $this->limit($limit, $offset)->get();
+        $paginateView = $this->getPaginateView($limit, $page, $isQuery);
+        $this->resetQuery();
+        $this->resetQuery = true;
+
+        return [
+            'data' => $result,
+            'link' => $paginateView,
+        ];
+    }
+    //
+    private function getPaginateLink ($page, $isQuery) {
+        if (!empty($_SERVER['QUERY_STRING']) && $isQuery) {
+            $queryString = trim($_SERVER['QUERY_STRING']);
+            
+            parse_str($queryString, $params);
+            $params['page'] = $page;
+        } else {
+            $params = ['page' => $page];
+        }
+        $link = http_build_query(($params));
+        $link = strpos($link, '?') !== false ? $link : '?'.$link;
+        return $link;
+    }
+    //
+    private function getPaginateView($limit, $page, $isQuery) {
+        $query = $this->query($this->sqlPaginate);
+        $totalRows = $query->rowCount();
+        $totalPage = ceil($totalRows/$limit);
+
+        $pageHtml = '';
+        for ($i = 1; $i <= $totalPage; $i++) {
+            $pageHtml .= '<li class="page-item'. ($page == $i ? ' active' : null) .'"><a class="page-link" href="'.$this->getPaginateLink($i, $isQuery).'">'.$i.'</a></li>';
+        }
+
+        $html = '<nav class="d-flex justify-content-end pagination-sm">
+                        <ul class="pagination">
+                            <li class="page-item"><a class="page-link" href="#">Trước</a></li>'.$pageHtml.'<li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                        </ul>
+        </nav>';
+        return $html;
+    }
     // Inner join
     function join($tableName, $relationShip)
     {
@@ -101,10 +153,15 @@ trait QueryBuilder
     {
         $sqlQuery = "SELECT $this->selectField FROM $this->tableName $this->innerJoin $this->where $this->orderBy $this->limit";
         $sqlQuery = trim($sqlQuery);
+
+        $this->sqlPaginate = trim("SELECT $this->selectField FROM $this->tableName $this->innerJoin $this->where");
+
         $query = $this->query($sqlQuery);
 
         // Reset field
-        $this->reserQuery();
+        if ($this->resetQuery) {
+            $this->resetQuery();
+        }
 
         if (!empty($query)) {
             return $query->fetchAll(pdo::FETCH_ASSOC);
@@ -147,10 +204,15 @@ trait QueryBuilder
     {
         $sqlQuery = "SELECT $this->selectField FROM $this->tableName $this->innerJoin $this->where $this->orderBy $this->limit";
         $sqlQuery = trim($sqlQuery);
+
+        $this->sqlPaginate = trim("SELECT $this->selectField FROM $this->tableName $this->innerJoin $this->where");
+
         $query = $this->query($sqlQuery);
 
         // Reset field
-        $this->reserQuery();
+        if ($this->resetQuery) {
+            $this->resetQuery();
+        }
 
         if (!empty($query)) {
             return $query->fetch(pdo::FETCH_ASSOC);
@@ -158,7 +220,7 @@ trait QueryBuilder
         return false;
     }
     //
-    function reserQuery()
+    function resetQuery()
     {
         // Reset field
         $this->tableName = '';
@@ -168,5 +230,6 @@ trait QueryBuilder
         $this->limit = '';
         $this->orderBy = '';
         $this->innerJoin = '';
+        $this->sqlPaginate = '';
     }
 }
