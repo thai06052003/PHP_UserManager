@@ -10,7 +10,7 @@ class User extends Model{
     function primaryKey() {
         return 'id';
     }
-    function getUser($filters = [], $keyword = '') {
+    function getUser($filters = [], $keyword = '', $limit) {
         $users = $this->db
             ->table($this->tableFill())
             ->select('users.*, groups.name as group_name')
@@ -28,7 +28,7 @@ class User extends Model{
                 ->orWhere('users.email', 'LIKE',"%$keyword%");
             });
         }
-        $users = $users->paginate(6);
+        $users = $users->paginate($limit);
         
         return $users;
     }

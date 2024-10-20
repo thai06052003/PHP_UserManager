@@ -26,13 +26,16 @@ class Paginate
         return $view;
     }
 
-    public static function render($query, $limit, $page, $isQuery)
+    public static function render($query, $limit, $page, $totalPage, $isQuery)
     {
         $totalRows = $query->rowCount();
         $totalPage = ceil($totalRows / $limit);
+
         $self = __CLASS__;
 
-        $view = self::getView(compact('page', 'totalPage', 'self', 'isQuery'));
+        $begin = max(2, $page-2);
+        $end = min($page+2, $totalPage-1);
+        $view = self::getView(compact('page', 'totalPage', 'self', 'isQuery', 'begin', 'end'));
 
         return $view;
     }

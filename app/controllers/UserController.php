@@ -4,9 +4,12 @@ class UserController extends Controller {
     private $data = [];
     private $userModel;
     private $groupModel;
+    private $config = [];
 
 
     public function __construct(){
+        global $config;
+        $this->config = $config['app'];
         $this->userModel = $this->model('User');
         $this->groupModel = $this->model('Group');
     }
@@ -32,7 +35,7 @@ class UserController extends Controller {
             }
         }
 
-        $userPaginate = $this->userModel->getUser($filters, $keyword ?? '');
+        $userPaginate = $this->userModel->getUser($filters, $keyword ?? '', $this->config['page_limit']);
         $users = $userPaginate['data'];
         $links = $userPaginate['link'];
 

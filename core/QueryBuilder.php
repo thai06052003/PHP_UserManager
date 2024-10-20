@@ -102,7 +102,15 @@ trait QueryBuilder
         $this->resetQuery = false;
         $result = $this->limit($limit, $offset)->get();
         $query = $this->query($this->sqlPaginate);
-        $paginateView = Paginate::render($query, $limit, $page, $isQuery);
+        $totalRows = $query->rowCount();
+        $totalPage = ceil($totalRows / $limit);
+
+        if ($page > $totalPage) {
+            $page = 1;
+            $result = $this->limit($limit, 0)->get();
+        }
+
+        $paginateView = Paginate::render($query, $limit, $page, $totalPage, $isQuery);
         $this->resetQuery();
         $this->resetQuery = true;
 
@@ -112,36 +120,38 @@ trait QueryBuilder
         ];
     }
     //
-    private function getPaginateLink ($page, $isQuery) {
+    private function getPaginateLink($page, $isQuery)
+    {
         if (!empty($_SERVER['QUERY_STRING']) && $isQuery) {
             $queryString = trim($_SERVER['QUERY_STRING']);
-            
+
             parse_str($queryString, $params);
             $params['page'] = $page;
         } else {
             $params = ['page' => $page];
         }
         $link = http_build_query(($params));
-        $link = strpos($link, '?') !== false ? $link : '?'.$link;
+        $link = strpos($link, '?') !== false ? $link : '?' . $link;
         return $link;
     }
     //
-    private function getPaginateView($limit, $page, $isQuery) {
+    private function getPaginateView($limit, $page, $isQuery)
+    {
         $query = $this->query($this->sqlPaginate);
         $totalRows = $query->rowCount();
-        $totalPage = ceil($totalRows/$limit);
+        $totalPage = ceil($totalRows / $limit);
 
         $pageHtml = '';
         for ($i = 1; $i <= $totalPage; $i++) {
-            $pageHtml .= '<li class="page-item'. ($page == $i ? ' active' : null) .'"><a class="page-link" href="'.$this->getPaginateLink($i, $isQuery).'">'.$i.'</a></li>';
+            $pageHtml .= '<li class="page-item' . ($page == $i ? ' active' : null) . '"><a class="page-link" href="' . $this->getPaginateLink($i, $isQuery) . '">' . $i . '</a></li>';
         }
 
         $html = '<nav class="d-flex justify-content-end ">
                         <ul class="pagination">
-                            '. ($page > 1 ? '<li class="page-item"><a class="page-link" href="'.$this->getPaginateLink($page-1, $isQuery).'">Trước</a></li>' : '<li class="page-item disabled"><a class="page-link" href="">Trước</a></li>') 
-                            .$pageHtml
-                            .($page < $totalPage ? '<li class="page-item"><a class="page-link" href="'.$this->getPaginateLink($page+1, $isQuery).'">Sau</a></li>' : '<li class="page-item disabled"><a class="page-link" href="">Sau</a></li>')
-                        .'</ul>
+                            ' . ($page > 1 ? '<li class="page-item"><a class="page-link" href="' . $this->getPaginateLink($page - 1, $isQuery) . '">Trước</a></li>' : '<li class="page-item disabled"><a class="page-link" href="">Trước</a></li>')
+            . $pageHtml
+            . ($page < $totalPage ? '<li class="page-item"><a class="page-link" href="' . $this->getPaginateLink($page + 1, $isQuery) . '">Sau</a></li>' : '<li class="page-item disabled"><a class="page-link" href="">Sau</a></li>')
+            . '</ul>
         </nav>';
         return $html;
     }
