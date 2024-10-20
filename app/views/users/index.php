@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-3">
             <select name="status" id="" class="form-select">
-                <option value="all" >Tất cả trạng thái</option>
+                <option value="all">Tất cả trạng thái</option>
                 <option value="active" {{!empty($request->getFields()['status']) && $request->getFields()['status'] == 'active' ? 'selected' : ''}}>Kích hoạt</option>
                 <option value="inactive" {{!empty($request->getFields()['status']) && $request->getFields()['status'] == 'inactive' ? 'selected' : ''}}>Chưa kích hoạt</option>
             </select>
@@ -16,9 +16,9 @@
             <select name="group_id" id="" class="form-select">
                 <option value="0">Tất cả nhóm</option>
                 @if ($groups)
-                    @foreach ($groups as $group)
-                        <option value="{{$group['id']}}" {{!empty($request->getFields()['group_id']) && $request->getFields()['group_id'] == $group['id'] ? 'selected' : ''}}>{{$group['name']}}</option>
-                    @endforeach
+                @foreach ($groups as $group)
+                <option value="{{$group['id']}}" {{!empty($request->getFields()['group_id']) && $request->getFields()['group_id'] == $group['id'] ? 'selected' : ''}}>{{$group['name']}}</option>
+                @endforeach
                 @endif
             </select>
         </div>
@@ -47,31 +47,31 @@
     </thead>
     <tbody>
         @if ($users)
-            @foreach ($users as $user)
-                <tr>
-                    <td>
-                        <input type="checkbox" name="" id="" value="{{$user['id']}}">
-                    </td>
-                    <td>{{$user['name']}}</td>
-                    <td>{{$user['email']}}</td>
-                    <td>{{$user['group_name']}}</td>
-                    <td>
-                        {! $user['status'] == 1 ? '<span class="badge bg-success">Kích hoạt</span>' : '<span class="badge bg-danger">Chưa kích hoạt</span>' !}
-                        
-                    </td>
-                    <td>
-                        {{getDateFormat($user['created_at'], 'd/m/Y')}}
-                        <br>
-                        {{getDateFormat($user['created_at'], 'H:i:s')}}
-                    </td>
-                    <td>
-                        <a href="{{_WEB_ROOT.'/admin/users/edit/'.$user['id']}}" class="btn btn-success btn-sm">Sửa</a>
-                    </td>
-                    <td>
-                        <a href="{{_WEB_ROOT.'/admin/users/delete/'.$user['id']}}" class="btn btn-danger btn-sm">Xóa</a>
-                    </td>
-                </tr>
-            @endforeach
+        @foreach ($users as $user)
+        <tr>
+            <td>
+                <input type="checkbox" name="" id="" value="{{$user['id']}}">
+            </td>
+            <td>{{$user['name']}}</td>
+            <td>{{$user['email']}}</td>
+            <td>{{$user['group_name']}}</td>
+            <td>
+                {! $user['status'] == 1 ? '<span class="badge bg-success">Kích hoạt</span>' : '<span class="badge bg-danger">Chưa kích hoạt</span>' !}
+
+            </td>
+            <td>
+                {{getDateFormat($user['created_at'], 'd/m/Y')}}
+                <br>
+                {{getDateFormat($user['created_at'], 'H:i:s')}}
+            </td>
+            <td>
+                <a href="{{_WEB_ROOT.'/admin/users/edit/'.$user['id']}}" class="btn btn-success btn-sm">Sửa</a>
+            </td>
+            <td>
+                <a href="{{_WEB_ROOT.'/admin/users/delete/'.$user['id']}}" class="btn btn-danger btn-sm">Xóa</a>
+            </td>
+        </tr>
+        @endforeach
         @endif
     </tbody>
 </table>
@@ -81,6 +81,8 @@
         <button class="btn btn-danger disabled">Xóa đã chọn (0)</button>
     </div>
     <div class="col-6">
-        {! $links !}
+        <nav class="d-flex justify-content-end ">
+            {! $links !}
+        </nav>
     </div>
 </div>

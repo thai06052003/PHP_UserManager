@@ -101,7 +101,8 @@ trait QueryBuilder
         $offset = ($page - 1) * $limit;
         $this->resetQuery = false;
         $result = $this->limit($limit, $offset)->get();
-        $paginateView = $this->getPaginateView($limit, $page, $isQuery);
+        $query = $this->query($this->sqlPaginate);
+        $paginateView = Paginate::render($query, $limit, $page, $isQuery);
         $this->resetQuery();
         $this->resetQuery = true;
 
@@ -135,10 +136,12 @@ trait QueryBuilder
             $pageHtml .= '<li class="page-item'. ($page == $i ? ' active' : null) .'"><a class="page-link" href="'.$this->getPaginateLink($i, $isQuery).'">'.$i.'</a></li>';
         }
 
-        $html = '<nav class="d-flex justify-content-end pagination-sm">
+        $html = '<nav class="d-flex justify-content-end ">
                         <ul class="pagination">
-                            <li class="page-item"><a class="page-link" href="#">Trước</a></li>'.$pageHtml.'<li class="page-item"><a class="page-link" href="#">Sau</a></li>
-                        </ul>
+                            '. ($page > 1 ? '<li class="page-item"><a class="page-link" href="'.$this->getPaginateLink($page-1, $isQuery).'">Trước</a></li>' : '<li class="page-item disabled"><a class="page-link" href="">Trước</a></li>') 
+                            .$pageHtml
+                            .($page < $totalPage ? '<li class="page-item"><a class="page-link" href="'.$this->getPaginateLink($page+1, $isQuery).'">Sau</a></li>' : '<li class="page-item disabled"><a class="page-link" href="">Sau</a></li>')
+                        .'</ul>
         </nav>';
         return $html;
     }

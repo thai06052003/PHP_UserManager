@@ -36,6 +36,7 @@ if (!empty($config['app']['service'])) {
 
 // Load Lib
 require_once './core/Hash.php';
+require_once './core/Paginate.php';
 
 // Load Service provider Class
 require_once './core/serviceProvider.php';
