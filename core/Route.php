@@ -5,7 +5,6 @@ class Route {
     public function handleRoute($url) {
         global $routes;
         unset($routes['default_controller']);
-        
 
         $url = trim($url, '/');
         
@@ -15,7 +14,7 @@ class Route {
 
         if (!empty($routes)) {
             foreach($routes as $key=>$value) {
-                if (preg_match('~^'.$key.'$~is', $url)) {
+                if (preg_match('~^'.$key.'~is', $url)) {
                     $handleUrl = preg_replace('~'.$key.'~is', $value, $url);
                     $this->__keyRoute = $key;
                 }

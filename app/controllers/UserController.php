@@ -48,4 +48,22 @@ class UserController extends Controller {
 
         $this->render('layouts/layout', $this->data);
     }
+    public function deletes() {
+        $request = new Request();
+        if ($request->isPost()) {
+            $body = $request->getFields();
+            if (!empty($body['ids'])) {
+                $ids = explode(',', $body['ids']);
+                echo '<pre>';
+                print_r($ids);
+                echo '</pre>';
+            }
+            return;
+        }
+        echo 'Method not support';
+    }
+    public function delete() {
+        
+        echo 'Delete View';
+    }
 }

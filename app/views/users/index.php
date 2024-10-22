@@ -34,7 +34,7 @@
     <thead>
         <tr>
             <th width="5%">
-                <input type="checkbox" name="" id="">
+                <input class="check-all" type="checkbox" name="" id="">
             </th>
             <th>Tên</th>
             <th>Email</th>
@@ -50,7 +50,7 @@
         @foreach ($users as $user)
         <tr>
             <td>
-                <input type="checkbox" name="" id="" value="{{$user['id']}}">
+                <input class="check-item" type="checkbox" name="" id="" value="{{$user['id']}}">
             </td>
             <td>{{$user['name']}}</td>
             <td>{{$user['email']}}</td>
@@ -78,7 +78,10 @@
 
 <div class="row">
     <div class="col-6">
-        <button class="btn btn-danger disabled">Xóa đã chọn (0)</button>
+        <form class="deletes-form" action="{{_WEB_ROOT.'/users/deletes'}}" method="post">
+            <button class="btn btn-danger disabled delete-selection">Xóa đã chọn (<span>0</span>)</button>
+            <input type="hidden" name="ids" class="ids">
+        </form>
     </div>
     <div class="col-6">
         <nav class="d-flex justify-content-end ">

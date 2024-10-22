@@ -28,7 +28,10 @@
 
     </main>
     <?php $this->render('blocks/footer') ?>
-
+    <!-- Custom JS -->
+    <script type="module" src="<?php echo _WEB_ROOT; ?>/public/assets/js/script.js"></script>
+    <!-- Api sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>
