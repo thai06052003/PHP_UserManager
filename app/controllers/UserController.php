@@ -1,20 +1,23 @@
 <?php
 // UserController Controller
-class UserController extends Controller {
+class UserController extends Controller
+{
     private $data = [];
     private $userModel;
     private $groupModel;
     private $config = [];
 
 
-    public function __construct(){
+    public function __construct()
+    {
         global $config;
         $this->config = $config['app'];
         $this->userModel = $this->model('User');
         $this->groupModel = $this->model('Group');
     }
-    
-    public function index(){
+
+    public function index()
+    {
         $request = new Request();
         $query = $request->getFields();
 
@@ -45,25 +48,33 @@ class UserController extends Controller {
         $this->data['dataView']['links'] = $links;
         $this->data['dataView']['groups'] = $groups;
         $this->data['dataView']['request'] = $request;
+        $this->data['msg'] = Session::flash('msg');
+        $this->data['msgType'] = Session::flash('msg_type');
 
         $this->render('layouts/layout', $this->data);
     }
-    public function deletes() {
+    public function deletes()
+    {
         $request = new Request();
+        $response = new Response();
         if ($request->isPost()) {
             $body = $request->getFields();
-            if (!empty($body['ids'])) {
-                $ids = explode(',', $body['ids']);
-                echo '<pre>';
-                print_r($ids);
-                echo '</pre>';
+            if (empty($body['ids'])) {
+                // Gắn thông báo vào flash
+                Session::flash('msg', 'Vui lòng chọn người dùng cần xóa');
+                Session::flash('msg_type', 'error');
+                return $response->redirect('/users');
             }
-            return;
+            $ids = explode(',', $body['ids']);
+            $this->userModel->deletes($ids);
+            Session::flash('msg', 'Xóa người dùng thành công');
+            Session::flash('msg_type', 'success');
+            return $response->redirect('/users');
         }
-        echo 'Method not support';
-    }
-    public function delete() {
-        
-        echo 'Delete View';
+        else {
+            Session::flash('msg', 'Vui lòng chọn người dùng cần xóa');
+                Session::flash('msg_type', 'error');
+            return $response->redirect('/users');
+        }
     }
 }

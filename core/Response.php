@@ -5,7 +5,7 @@ class Response {
             $url = $uri;
         }
         else {
-            $url = _WEB_ROOT.'/'.$uri;
+            $url = _WEB_ROOT.$uri;
         }
         header("Location: ".$url);
         exit;

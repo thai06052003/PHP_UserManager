@@ -1,8 +1,8 @@
 <header class="header">
     <div class="container">
         <div class="row">
-            <div class="col-3">
-                <a href="<?php echo _WEB_ROOT; ?>">
+            <div class="col-3 d-flex">
+                <a class="align-content-center" href="<?php echo _WEB_ROOT; ?>">
                     <img src="<?php echo _WEB_ROOT ?>/public/assets/images/logo.png" alt="">
                 </a>
             </div>

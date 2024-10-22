@@ -32,4 +32,7 @@ class User extends Model{
         
         return $users;
     }
+    public function deletes($ids) {
+        return $this->db->table($this->tableFill())->whereIn('id', $ids)->delete();
+    }
 }
