@@ -35,4 +35,7 @@ class User extends Model{
     public function deletes($ids) {
         return $this->db->table($this->tableFill())->whereIn('id', $ids)->delete();
     }
+    public function addUser($data) {
+        return $this->db->table($this->tableFill())->insert($data);
+    }
 }

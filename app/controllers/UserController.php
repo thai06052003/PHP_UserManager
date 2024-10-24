@@ -53,6 +53,85 @@ class UserController extends Controller
 
         $this->render('layouts/layout', $this->data);
     }
+    //
+    public function create() {
+        $groups = $this->groupModel->getGroup();
+
+        $this->data['body'] = 'users/add';
+        $this->data['dataView']['pageTitle'] = 'Thêm người dùng';
+        $this->data['dataView']['groups'] = $groups;
+
+        $this->render('layouts/layout', $this->data);
+    }
+    //
+    public function store() {
+        $request = new Request();
+        if (!$request->isPost()) {
+            echo 'Not Allow Method';
+            return;
+        }
+        
+        // validate
+        $rules = [
+            'name' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+            'confirm_password' => 'required|callback_checkSamePassword',
+            'status' => 'callback_checkStatus',
+            'group_id' => 'callback_checkGroup'
+        ];
+
+        $message = [
+            'name.required' => 'Tên bắt buộc phải nhập',
+            'email.required' => 'Email bắt buộc phải nhập',
+            'email.email' => 'Email Không đúng định dạng',
+            'password.required' => 'Mật khẩu bắt buộc phải nhập',
+            'password.min' => 'Mật khẩu phải từ :min ký tự',
+            'confirm_password.required' => 'Nhập lại mật khẩu không được để trống',
+            'confirm_password.callback_checkSamePassword' => 'Mật khẩu khoogn khớp',
+            'status.callback_checkStatus' => 'Trạng thái không hợp lệ',
+            'group_id.callback_checkGroup' => 'Nhóm không hợp lệ',
+        ];
+        $request->rules($rules);
+        $request->message($message);
+        
+
+        $check = $request->validate();
+        /* echo '<pre>';
+        print_r($request->error());
+        echo '</pre>'; */
+        if (!$request->validate()) {
+            Session::flash('msg', 'Vui lòng kiểm tra lại thông tin');
+            Session::flash('msg_type', 'error');
+        }
+
+        /* $body = $request->getFields();
+        unset($body['confirm_pasword']);
+        $status = $this->userModel->addUser($body);
+        echo '<pre>';
+        print_r($status);
+        echo '</pre>'; */
+    }
+    //
+    public function callback_checkSamePassword($value) {
+        $request = new Request();
+        $body = $request->getFields();
+        if ($body['password'] == $value) {
+            return true;
+        }
+        return false;
+    }
+    //
+    public function callback_checkStatus($value) {
+        return $value == 0 || $value == 1;
+    }
+    //
+    public function callback_checkGroup($value) {
+        return filter_var($value, FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => 1]
+        ]);
+    }
+    //
     public function deletes()
     {
         $request = new Request();
@@ -77,4 +156,5 @@ class UserController extends Controller
             return $response->redirect('/users');
         }
     }
+    
 }
