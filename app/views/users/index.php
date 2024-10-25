@@ -66,10 +66,10 @@
                 {{getDateFormat($user['created_at'], 'H:i:s')}}
             </td>
             <td>
-                <a href="{{_WEB_ROOT.'/admin/users/edit/'.$user['id']}}" class="btn btn-success btn-sm">Sửa</a>
+                <a href="{{_WEB_ROOT.'/users/edit/'.$user['id']}}" class="btn btn-success btn-sm">Sửa</a>
             </td>
             <td>
-                <a href="{{_WEB_ROOT.'/admin/users/delete/'.$user['id']}}" class="btn btn-danger btn-sm">Xóa</a>
+                <a href="{{_WEB_ROOT.'/users/delete/'.$user['id']}}" class="btn btn-danger btn-sm">Xóa</a>
             </td>
         </tr>
         @endforeach

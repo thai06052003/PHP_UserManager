@@ -15,7 +15,7 @@ class UserController extends Controller
         $this->userModel = $this->model('User');
         $this->groupModel = $this->model('Group');
     }
-
+    // Danh sách người dùng
     public function index()
     {
         $request = new Request();
@@ -38,7 +38,7 @@ class UserController extends Controller
             }
         }
 
-        $userPaginate = $this->userModel->getUser($filters, $keyword ?? '', $this->config['page_limit']);
+        $userPaginate = $this->userModel->getUsers($filters, $keyword ?? '', $this->config['page_limit']);
         $users = $userPaginate['data'];
         $links = $userPaginate['link'];
 
@@ -53,7 +53,7 @@ class UserController extends Controller
 
         $this->render('layouts/layout', $this->data);
     }
-    //
+    // Thêm người dùng
     public function create() {
         $groups = $this->groupModel->getGroup();
 
@@ -66,6 +66,96 @@ class UserController extends Controller
         $this->render('layouts/layout', $this->data);
     }
     //
+    public function edit($id) {
+        $groups = $this->groupModel->getGroup();
+        $user = $this->userModel->getUser($id);
+        if (!$user) {
+            Session::flash('msg', 'Người dùng không tồn tại');
+            Session::flash('msg_type', 'error');
+            return (new Response)->redirect('/users');
+        }
+        (new Request())->setOld($user);
+        $this->data['body'] = 'users/edit';
+        
+        $this->data['dataView']['pageTitle'] = 'Cập nhật người dùng';
+        $this->data['dataView']['groups'] = $groups;
+        $this->data['dataView']['user'] = $user;
+
+        $this->data['msg'] = Session::flash('msg');
+        $this->data['msgType'] = Session::flash('msg_type');
+
+        $this->render('layouts/layout', $this->data);
+    }
+    //
+    public function update($id) {
+        $request = new Request();
+        if (!$request->isPost()) {
+            echo 'Not Alow Method';
+            return;
+        }
+        $body = $request->getFields();
+
+        // Validate form
+        $rules = [
+            'name' => 'required',
+            'email' => 'required|email|unique:users:email:id='.$id,
+            //'password' => 'required|min:6',
+            //'confirm_password' => 'required|callback_checkSamePassword',
+            'status' => 'callback_checkStatus',
+            'group_id' => 'callback_checkGroup'
+        ];
+
+        $message = [
+            'name.required' => 'Tên bắt buộc phải nhập',
+            'email.required' => 'Email bắt buộc phải nhập',
+            'email.email' => 'Email Không đúng định dạng',
+            'email.unique' => 'Email đã tồn tại trên hệ thống',
+            //'password.required' => 'Mật khẩu bắt buộc phải nhập',
+            'password.min' => 'Mật khẩu phải từ :min ký tự',
+            'confirm_password.required' => 'Nhập lại mật khẩu không được để trống',
+            'confirm_password.callback_checkSamePassword' => 'Mật khẩu không khớp',
+            'status.callback_checkStatus' => 'Trạng thái không hợp lệ',
+            'group_id.callback_checkGroup' => 'Nhóm không hợp lệ',
+        ];
+        if (!empty($body['password'])) {
+            $rules['password'] = 'min:6';
+            $rules['confirm_password'] = 'required|callback_checkSamePassword';
+        }
+
+        $request->rules($rules);
+        $request->message($message);
+        
+
+        $check = $request->validate();
+        if (!$request->validate()) {
+            Session::flash('msg', 'Vui lòng kiểm tra lại thông tin');
+            Session::flash('msg_type', 'error');
+            return (new Response())->redirect('/users/edit/'.$id);
+        }
+        //$2y$10$yhf1j7jHwQfQT8A0uFvqVOMQUp8WSIhFPT7SCSwQ4AmoRdcVA3IE2
+        // xử lý update
+        if (!empty($body['password'])) {
+            $body['password'] = Hash::make($body['password']);
+        }else {
+            unset($body['password']);
+        }
+        unset($body['confirm_password']);
+        /* echo '<pre>';
+        print_r($body);
+        echo '</pre>';
+        die; */
+        $status = $this->userModel->updateUser($body, $id);
+        if ($status) {
+            Session::flash('msg', 'Cập nhật người dùng thành công');
+            Session::flash('msg_type', 'success');
+        }
+        else {
+            Session::flash('msg', 'Lỗi máy chủ vui lòng thử lại sau');
+            Session::flash('msg_type', 'error');
+        }
+        return (new Response())->redirect('/users/edit/'.$id);
+    }
+    // Xử lý thêm người dùng
     public function store() {
         $request = new Request();
         if (!$request->isPost()) {
@@ -100,9 +190,6 @@ class UserController extends Controller
         
 
         $check = $request->validate();
-        /* echo '<pre>';
-        print_r($request->error());
-        echo '</pre>'; */
         if (!$request->validate()) {
             Session::flash('msg', 'Vui lòng kiểm tra lại thông tin');
             Session::flash('msg_type', 'error');
@@ -124,7 +211,7 @@ class UserController extends Controller
             return (new Response())->redirect('/users/create');
         }
     }
-    //
+    // Kiểm tra validate confirm_password === password
     public function checkSamePassword($value) {
         $request = new Request();
         $body = $request->getFields();
@@ -133,17 +220,17 @@ class UserController extends Controller
         }
         return false;
     }
-    //
+    // Kiểm tra validate status
     public function checkStatus($value) {
         return $value == 0 || $value == 1;
     }
-    //
+    // Kiểm tra validate Group
     public function checkGroup($value) {
         return filter_var($value, FILTER_VALIDATE_INT, [
         'options' => ['min_range' => 1]
         ]);
     }
-    //
+    // Xóa người dùng
     public function deletes()
     {
         $request = new Request();

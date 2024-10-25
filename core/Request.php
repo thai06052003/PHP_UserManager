@@ -179,4 +179,9 @@ class Request
     {
         $this->__errors[$fieldName][$ruleName] = $this->__message[$fieldName . '.' . $ruleName];
     }
+    //
+    public function setOld($data) {
+        $sessionKey = Session::isInvalid();
+        $old = Session::flash($sessionKey . '_old', $data);
+    }
 }

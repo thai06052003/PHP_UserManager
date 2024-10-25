@@ -10,7 +10,7 @@ class User extends Model{
     function primaryKey() {
         return 'id';
     }
-    function getUser($filters = [], $keyword = '', $limit) {
+    function getUsers($filters = [], $keyword = '', $limit) {
         $users = $this->db
             ->table($this->tableFill())
             ->select('users.*, groups.name as group_name')
@@ -38,4 +38,13 @@ class User extends Model{
     public function addUser($data) {
         return $this->db->table($this->tableFill())->insert($data);
     }
+    //
+    public function getUser ($id) {
+        return $this->db->table($this->tableFill())->where('id', '=', $id)->first();
+    }
+    //
+    public function updateUser($data, $id) {
+        return $this->db->table($this->tableFill())->where('id', '=', $id)->update($data);
+    }
+
 }

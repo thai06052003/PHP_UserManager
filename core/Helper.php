@@ -18,6 +18,6 @@ if (!function_exists('old')) {
         if (!empty($old[$fieldName])) {
             return $old[$fieldName];
         }
-        return false;
+        return $default;
     }
 }
