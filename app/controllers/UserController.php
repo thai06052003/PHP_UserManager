@@ -60,6 +60,8 @@ class UserController extends Controller
         $this->data['body'] = 'users/add';
         $this->data['dataView']['pageTitle'] = 'Thêm người dùng';
         $this->data['dataView']['groups'] = $groups;
+        $this->data['msg'] = Session::flash('msg');
+        $this->data['msgType'] = Session::flash('msg_type');
 
         $this->render('layouts/layout', $this->data);
     }
@@ -74,7 +76,7 @@ class UserController extends Controller
         // validate
         $rules = [
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users:email',
             'password' => 'required|min:6',
             'confirm_password' => 'required|callback_checkSamePassword',
             'status' => 'callback_checkStatus',
@@ -85,10 +87,11 @@ class UserController extends Controller
             'name.required' => 'Tên bắt buộc phải nhập',
             'email.required' => 'Email bắt buộc phải nhập',
             'email.email' => 'Email Không đúng định dạng',
+            'email.unique' => 'Email đã tồn tại trên hệ thống',
             'password.required' => 'Mật khẩu bắt buộc phải nhập',
             'password.min' => 'Mật khẩu phải từ :min ký tự',
             'confirm_password.required' => 'Nhập lại mật khẩu không được để trống',
-            'confirm_password.callback_checkSamePassword' => 'Mật khẩu khoogn khớp',
+            'confirm_password.callback_checkSamePassword' => 'Mật khẩu không khớp',
             'status.callback_checkStatus' => 'Trạng thái không hợp lệ',
             'group_id.callback_checkGroup' => 'Nhóm không hợp lệ',
         ];
@@ -103,17 +106,26 @@ class UserController extends Controller
         if (!$request->validate()) {
             Session::flash('msg', 'Vui lòng kiểm tra lại thông tin');
             Session::flash('msg_type', 'error');
+            return (new Response())->redirect('/users/create');
         }
 
-        /* $body = $request->getFields();
-        unset($body['confirm_pasword']);
+        $body = $request->getFields();
+        unset($body['confirm_password']);
+        $body['password'] = Hash::make($body['password']);
         $status = $this->userModel->addUser($body);
-        echo '<pre>';
-        print_r($status);
-        echo '</pre>'; */
+        if ($status) {
+            Session::flash('msg', 'Thêm thành công');
+            Session::flash('msg_type', 'success');
+            return (new Response())->redirect('/users');
+        }
+        else {
+            Session::flash('msg', 'Lỗi máy chủ vui lòng thử lại sau');
+            Session::flash('msg_type', 'error');
+            return (new Response())->redirect('/users/create');
+        }
     }
     //
-    public function callback_checkSamePassword($value) {
+    public function checkSamePassword($value) {
         $request = new Request();
         $body = $request->getFields();
         if ($body['password'] == $value) {
@@ -122,11 +134,11 @@ class UserController extends Controller
         return false;
     }
     //
-    public function callback_checkStatus($value) {
+    public function checkStatus($value) {
         return $value == 0 || $value == 1;
     }
     //
-    public function callback_checkGroup($value) {
+    public function checkGroup($value) {
         return filter_var($value, FILTER_VALIDATE_INT, [
         'options' => ['min_range' => 1]
         ]);
