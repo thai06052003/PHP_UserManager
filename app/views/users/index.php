@@ -69,7 +69,9 @@
                 <a href="{{_WEB_ROOT.'/users/edit/'.$user['id']}}" class="btn btn-success btn-sm">Sửa</a>
             </td>
             <td>
-                <a href="{{_WEB_ROOT.'/users/delete/'.$user['id']}}" class="btn btn-danger btn-sm">Xóa</a>
+                <form class="deletes-form" action="{{_WEB_ROOT.'/users/delete/'.$user['id']}}" method="post">
+                    <button class="btn btn-danger btn-sm">Xóa</button>
+                </form>
             </td>
         </tr>
         @endforeach

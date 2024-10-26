@@ -132,18 +132,14 @@ class UserController extends Controller
             Session::flash('msg_type', 'error');
             return (new Response())->redirect('/users/edit/'.$id);
         }
-        //$2y$10$yhf1j7jHwQfQT8A0uFvqVOMQUp8WSIhFPT7SCSwQ4AmoRdcVA3IE2
         // xử lý update
         if (!empty($body['password'])) {
             $body['password'] = Hash::make($body['password']);
         }else {
             unset($body['password']);
         }
+        
         unset($body['confirm_password']);
-        /* echo '<pre>';
-        print_r($body);
-        echo '</pre>';
-        die; */
         $status = $this->userModel->updateUser($body, $id);
         if ($status) {
             Session::flash('msg', 'Cập nhật người dùng thành công');
@@ -230,7 +226,7 @@ class UserController extends Controller
         'options' => ['min_range' => 1]
         ]);
     }
-    // Xóa người dùng
+    // Xóa nhiều người dùng
     public function deletes()
     {
         $request = new Request();
@@ -247,13 +243,31 @@ class UserController extends Controller
             $this->userModel->deletes($ids);
             Session::flash('msg', 'Xóa người dùng thành công');
             Session::flash('msg_type', 'success');
-            return $response->redirect('/users');
         }
         else {
             Session::flash('msg', 'Vui lòng chọn người dùng cần xóa');
+            Session::flash('msg_type', 'error');
+        }
+        return $response->redirect('/users');
+    }
+    // Xóa 1 người dùng
+    public function delete($id) {
+        $request = new Request();
+        $response = new Response;
+        if ($request->isPost()) {
+            // Xử lí --> csrf
+            // model
+            $status = $this->userModel->deletes([$id]);
+            if ($status) {
+                Session::flash('msg', 'Xóa người dùng thành công');
+                Session::flash('msg_type', 'success');
+            }
+            else {
+                Session::flash('msg', 'Vui lòng chọn người dùng cần xóa');
                 Session::flash('msg_type', 'error');
+            }
             return $response->redirect('/users');
         }
+        echo "Method GET not support";
     }
-    
 }
