@@ -11,7 +11,7 @@ class Route {
         if (empty($url)) $url = '/';
 
         $handleUrl = $url;
-
+        
         if (!empty($routes)) {
             foreach($routes as $key=>$value) {
                 if (preg_match('~^'.$key.'~is', $url)) {
