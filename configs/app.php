@@ -5,6 +5,7 @@ $config['app'] = [
     ],
     'routeMiddleware' => [
         '/*' => AuthMiddleware::class,
+        '/auth/*' => GuestMiddleware::class,
     ],
     'globalMiddleware' => [
         

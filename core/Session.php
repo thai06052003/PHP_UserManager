@@ -8,7 +8,6 @@ class Session
     static public function data($key='', $value = '')
     {
         $sessionkey = self::isInvalid();
-        //echo $sessionkey;
         if (!empty($value) && !empty($key)) {
             $_SESSION[$sessionkey][$key] = $value;  // set session
             return true;

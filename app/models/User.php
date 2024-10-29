@@ -39,8 +39,8 @@ class User extends Model{
         return $this->db->table($this->tableFill())->insert($data);
     }
     //
-    public function getUser ($id) {
-        return $this->db->table($this->tableFill())->where('id', '=', $id)->first();
+    public function getUser ($value, $field='id') {
+        return $this->db->table($this->tableFill())->where($field, '=', $value)->first();
     }
     //
     public function updateUser($data, $id) {

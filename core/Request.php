@@ -12,7 +12,7 @@ class Request
     }
     //
     public function getPath() {
-        if (!empty($_SERVER['REQUEST_METHOD'])) {
+        if (!empty($_SERVER['REQUEST_METHOD']) && !empty($_SERVER['PATH_INFO'])) {
             $url = $_SERVER['PATH_INFO'];
         }
         else {
