@@ -50,7 +50,7 @@ class AuthController extends Controller
         }
         echo "Method " . strtoupper($request->getMethod()) . " not support.";
     }
-    //
+    // Đăng xuất
     public function logout()
     {
         Session::delete('user_login');
@@ -64,6 +64,65 @@ class AuthController extends Controller
     {
         $this->data['body'] = 'auth/register';
         $this->data['dataView']['pageTitle'] = 'Đăng ký tài khoản';
+        $this->data['msg'] = Session::flash('msg');
+        $this->data['msgType'] = Session::flash('msg_type');
+        $this->render('layouts/auth', $this->data);
+    }
+    //
+    public function handleRegister()
+    {
+        $request = new Request();
+        if (!$request->isPost()) {
+            echo 'Not Allow Method';
+            return;
+        }
+
+        // validate
+        $rules = [
+            'name' => 'required',
+            'email' => 'required|email|unique:users:email',
+            'password' => 'required|min:6',
+            'confirm_password' => 'required|callback_checkSamePassword',
+        ];
+
+        $message = [
+            'name.required' => 'Tên bắt buộc phải nhập',
+            'email.required' => 'Email bắt buộc phải nhập',
+            'email.email' => 'Email Không đúng định dạng',
+            'email.unique' => 'Email đã tồn tại trên hệ thống',
+            'password.required' => 'Mật khẩu bắt buộc phải nhập',
+            'password.min' => 'Mật khẩu phải từ :min ký tự',
+            'confirm_password.required' => 'Nhập lại mật khẩu không được để trống',
+            'confirm_password.callback_checkSamePassword' => 'Mật khẩu không khớp',
+        ];
+        $request->rules($rules);
+        $request->message($message);
+
+
+        $check = $request->validate();
+        if (!$request->validate()) {
+            Session::flash('msg', 'Vui lòng kiểm tra lại thông tin');
+            Session::flash('msg_type', 'error');
+            return (new Response())->redirect('/auth/register');
+        }
+
+        $body = $request->getFields();
+        unset($body['confirm_password']);
+        $body['password'] = Hash::make($body['password']);
+        $body['group_id'] = 3;
+        $status = $this->userModel->addUser($body);
+        if ($status) {
+            return (new Response())->redirect('/auth/active-account');
+        } else {
+            Session::flash('msg', 'Lỗi máy chủ vui lòng thử lại sau');
+            Session::flash('msg_type', 'error');
+            return (new Response())->redirect('/auth/register');
+        }
+    }
+    //
+    public function showActive() {
+        $this->data['body'] = 'auth/active-notice';
+        $this->data['dataView']['pageTitle'] = 'Kích hoạt tài khoản';
         $this->render('layouts/auth', $this->data);
     }
 }

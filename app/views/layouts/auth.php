@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập hệ thống</title>
+    <title><?php echo $dataView['pageTitle'] ?? 'DXT' ?></title>
     <!-- Bootstrap v5.1.3 -->
     <link rel="stylesheet" href="<?php echo _WEB_ROOT ?>/public/assets/css/bootstrap.min.css">
     <!-- Custom CSS -->
