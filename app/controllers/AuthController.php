@@ -151,9 +151,11 @@ class AuthController extends Controller
         }
         $this->data['body'] = 'auth/active-notice';
         $this->data['dataView']['pageTitle'] = 'Kích hoạt tài khoản';
+        $this->data['msg'] = Session::flash('msg');
+        $this->data['msgType'] = Session::flash('msg_type');
         $this->render('layouts/auth', $this->data);
     }
-    //
+    // kích hoạt tài khoản
     public function active()
     {
         $request = new Request();
@@ -178,7 +180,44 @@ class AuthController extends Controller
 
             $this->data['body'] = 'auth/active-result';
             $this->data['dataView']['pageTitle'] = 'Kích hoạt tài khoản';
+            Session::delete('user_active');
             $this->render('layouts/auth', $this->data);
+        }
+    }
+    //
+    public function resendActive() {
+        $request = new Request();
+        
+        if ($request->isPost()) {
+            $userId = Session::data('user_active');
+            $user = $this->userModel->getUser($userId);
+            // Tạo active token
+            $activeToken = md5(uniqid());   // 32 ký tự
+            // Update active token vào bảng user
+            $this->userModel->updateUser([
+                'active_token' => $activeToken,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ], $userId);
+            // Tạo link kích hoạt
+            $linkActive = _WEB_ROOT . '/auth/active?token=' . $activeToken;
+            // Gửi email
+            $name = $user['name'];
+            $subject = "$name hãy kích hoạt tài khoản";
+            $content = "
+                <p>Chào bạn: $name</p>
+                <p>Cảm ơn bạn đã đăng ký tài khoản trên Website của chúng tôi</p>
+                <p>Để tiếp tực sử dụng. Vui lòng click vào link dưới đây để kích hoạt tài khoản</p>
+                <p>$linkActive</p>
+                <p>DXT</p>
+            ";
+            Mail::send($user['email'], $subject, $content);
+
+            Session::flash('msg', 'Đã gửi lại email kích hoạt thành công');
+            Session::flash('msg_type', 'success');
+            return (new Response)->redirect('/auth/active-account');
+        }
+        else {
+            echo 'Method '.strtoupper($request->getMethod()).' not support';
         }
     }
 }
