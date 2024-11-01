@@ -17,7 +17,7 @@
 
     <div class="mb-3">
         <label for="confirm_password">Nhập lại mật khẩu</label>
-        <input type="confirm_password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Nhập lại mật khẩu...">
+        <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Nhập lại mật khẩu...">
     </div>
 
     <div class="d-grid">

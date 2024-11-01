@@ -46,5 +46,8 @@ class User extends Model{
     public function updateUser($data, $id) {
         return $this->db->table($this->tableFill())->where('id', '=', $id)->update($data);
     }
-
+    //
+    public function getLastUserId() {
+        return $this->db->lastId();
+    }
 }

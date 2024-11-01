@@ -111,7 +111,31 @@ class AuthController extends Controller
         $body['password'] = Hash::make($body['password']);
         $body['group_id'] = 3;
         $status = $this->userModel->addUser($body);
+
         if ($status) {
+            $userId = $this->userModel->getLastUserId();
+            Session::data('user_active', $userId);
+
+            // Tạo active token
+            $activeToken = md5(uniqid());   // 32 ký tự
+            // Update active token vào bảng user
+            $this->userModel->updateUser([
+                'active_token' => $activeToken,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ], $userId);
+            // Tạo link kích hoạt
+            $linkActive = _WEB_ROOT . '/auth/active?token=' . $activeToken;
+            // Gửi email
+            $name = $body['name'];
+            $subject = "$name hãy kích hoạt tài khoản";
+            $content = "
+                <p>Chào bạn: $name</p>
+                <p>Cảm ơn bạn đã đăng ký tài khoản trên Website của chúng tôi</p>
+                <p>Để tiếp tực sử dụng. Vui lòng click vào link dưới đây để kích hoạt tài khoản</p>
+                <p>$linkActive</p>
+                <p>DXT</p>
+            ";
+            Mail::send($body['email'], $subject, $content);
             return (new Response())->redirect('/auth/active-account');
         } else {
             Session::flash('msg', 'Lỗi máy chủ vui lòng thử lại sau');
@@ -120,9 +144,41 @@ class AuthController extends Controller
         }
     }
     //
-    public function showActive() {
+    public function showActive()
+    {
+        if (!session::data('user_active')) {
+            return (new Response)->redirect('/auth/register');
+        }
         $this->data['body'] = 'auth/active-notice';
         $this->data['dataView']['pageTitle'] = 'Kích hoạt tài khoản';
         $this->render('layouts/auth', $this->data);
+    }
+    //
+    public function active()
+    {
+        $request = new Request();
+        $query = $request->getFields();
+        if (!empty($query['token'])) {
+            $token = $query['token'];
+            $user = $this->userModel->getUser($token, 'active_token');
+
+            if (empty($user)) {
+                $this->data['dataView']['message'] = 'Liên kết không tồn tại hoặc đã hết hạn';
+                $this->data['dataView']['type'] = 'danger';
+            }
+            else {
+                $this->userModel->updateUser([
+                    'status' => 1,
+                    'active_token' => null,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ], $user['id']);
+                $this->data['dataView']['message'] = 'Kích hoạt tài khoản thành công';
+                $this->data['dataView']['type'] = 'success';
+            }
+
+            $this->data['body'] = 'auth/active-result';
+            $this->data['dataView']['pageTitle'] = 'Kích hoạt tài khoản';
+            $this->render('layouts/auth', $this->data);
+        }
     }
 }
