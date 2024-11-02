@@ -19,29 +19,37 @@ class AuthController extends Controller
 
         $this->render('layouts/auth', $this->data);
     }
-    //
+    // Xử lý đăng nhập
     public function handleLogin()
     {
         $request = new Request();
         $response = new Response();
         if ($request->isPost()) {
+            // Lấy ra giá trị đã post
             $body = $request->getFields();
             if (empty($body['email']) || empty($body['password'])) {
+                // Error
                 Session::flash('msg', 'Vui lòng nhập email và mật khẩu');
                 Session::flash('msg_type', 'error');
             } else {
                 $user = $this->userModel->getUser($body['email'], 'email');
                 if (!$user || !$user['status']) {
+                    // Error
                     Session::flash('msg', 'Email hoặc mật khẩu không chính xác');
                     Session::flash('msg_type', 'error');
                 } else {
                     $passwordHash = $user['password'];
                     $verifyStatus = Hash::check($body['password'], $passwordHash);
                     if (!$verifyStatus) {
+                        // Error
                         Session::flash('msg', 'Email hoặc mật khẩu không chính xác');
                         Session::flash('msg_type', 'error');
                     } else {
+                        // Success
                         Session::data('user_login', $user);
+                        $this->userModel->updateUser([
+                            'session_id' => Session::id(),
+                        ], $user['id']);
                         return $response->redirect('/');
                     }
                 }
@@ -68,7 +76,7 @@ class AuthController extends Controller
         $this->data['msgType'] = Session::flash('msg_type');
         $this->render('layouts/auth', $this->data);
     }
-    //
+    // Xử lý đăng ký
     public function handleRegister()
     {
         $request = new Request();
@@ -143,7 +151,7 @@ class AuthController extends Controller
             return (new Response())->redirect('/auth/register');
         }
     }
-    //
+    // Hiển thị kích hoạt
     public function showActive()
     {
         if (!session::data('user_active')) {
@@ -167,8 +175,7 @@ class AuthController extends Controller
             if (empty($user)) {
                 $this->data['dataView']['message'] = 'Liên kết không tồn tại hoặc đã hết hạn';
                 $this->data['dataView']['type'] = 'danger';
-            }
-            else {
+            } else {
                 $this->userModel->updateUser([
                     'status' => 1,
                     'active_token' => null,
@@ -184,10 +191,11 @@ class AuthController extends Controller
             $this->render('layouts/auth', $this->data);
         }
     }
-    //
-    public function resendActive() {
+    // Gửi lại email kích hoạt
+    public function resendActive()
+    {
         $request = new Request();
-        
+
         if ($request->isPost()) {
             $userId = Session::data('user_active');
             $user = $this->userModel->getUser($userId);
@@ -215,9 +223,65 @@ class AuthController extends Controller
             Session::flash('msg', 'Đã gửi lại email kích hoạt thành công');
             Session::flash('msg_type', 'success');
             return (new Response)->redirect('/auth/active-account');
+        } else {
+            echo 'Method ' . strtoupper($request->getMethod()) . ' not support';
         }
-        else {
-            echo 'Method '.strtoupper($request->getMethod()).' not support';
+    }
+    // Quên mật khẩu
+    public function forgotPassword()
+    {
+        $this->data['body'] = 'auth/forgot-password';
+        $this->data['dataView']['pageTitle'] = 'Lấy lại mật khẩu';
+        $this->data['msg'] = Session::flash('msg');
+        $this->data['msgType'] = Session::flash('msg_type');
+        $this->render('layouts/auth', $this->data);
+    }
+    public function handleForgotPassword()
+    {
+        $request = new Request();
+        $response = new Response();
+        if ($request->isPost()) {
+            // Lấy ra giá trị đã post
+            $body = $request->getFields();
+            if (empty($body['email'])) {
+                // Error
+                Session::flash('msg', 'Vui lòng nhập email để lấy lại mật khẩu');
+                Session::flash('msg_type', 'error');
+            } else {
+                $user = $this->userModel->getUser($body['email'], 'email');
+                if (!$user || !$user['status']) {
+                    // Error
+                    Session::flash('msg', 'Email không tồn tại trên hệ thống');
+                    Session::flash('msg_type', 'error');
+                } else {
+                    // Success
+                    $userId = $user['id'];
+                    // Tạo reset token
+                    $resetToken = md5(uniqid());   // 32 ký tự
+                    // Update reset token vào bảng user
+                    $this->userModel->updateUser([
+                        'reset_token' => $resetToken,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ], $userId);
+                    // Tạo link kích hoạt
+                    $linkReset = _WEB_ROOT . '/auth/reset?token=' . $resetToken;
+                    // Gửi email
+                    $name = $user['name'];
+                    $subject = "Yêu cầu đặt lại mật khẩu";
+                    $content = "
+                        <p>Chào bạn: $name</p>
+                        <p>Chúng tôi có nhận được yêu cầu đặt lại mật khẩu</p>
+                        <p>Để xác nhận đây là yêu cầu của bạn. Vui lòng click vào link dưới đây để kích hoạt tài khoản</p>
+                        <p>$linkReset</p>
+                        <p>DXT</p>
+                    ";
+                    Mail::send($user['email'], $subject, $content);
+                    Session::flash('msg', 'Vui lòng kiêm tra email để đặt lại mật khẩu');
+                    Session::flash('msg_type', 'success');
+                }
+            }
+            return $response->redirect('/auth/forgot-password');
         }
+        echo "Method " . strtoupper($request->getMethod()) . " not support.";
     }
 }

@@ -1,7 +1,8 @@
 <?php
 class Session
 {
-    /* 
+    /*
+    - Truyền hoặc lấy session
     data(key, value) => set session
     data(key) => get session
     */
@@ -22,7 +23,8 @@ class Session
             }
         }
     }
-    /* 
+    /*
+    - Xóa session
     delete(key) => xóa session với key
     delete() => xóa hết session
     */
@@ -41,7 +43,7 @@ class Session
         return false;
     }
     /* 
-    Flash Data
+    - Flash Data
     - set flash data => giống như set session 
     - get flash data => giống như get session, xóa luôn session sau khi get
     */
@@ -72,5 +74,8 @@ class Session
         } else {
             self::showError('Thiếu cấu hình session. Vui lòng kiểm tra file: configs/session.php');
         }
+    }
+    static function id () {
+        return session_id();
     }
 }

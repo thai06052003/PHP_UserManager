@@ -3,7 +3,7 @@
 
 class AuthMiddleware extends Middleware {
     public function handle(){
-        // Handel Method
+        // Handle Method
         $request = new Request();
         $response = new Response;
         $path = $request->getPath();
@@ -16,6 +16,8 @@ class AuthMiddleware extends Middleware {
             '/auth/active-account',
             '/auth/active',
             '/auth/resend-active',
+            '/auth/forgot-password',
+            '/auth/do-forgot-password',
         ];
 
         $auth = $this->checkAuth();
@@ -29,13 +31,17 @@ class AuthMiddleware extends Middleware {
             }
         }
     }
+    // Kiểm tra đăng nhập
     public function checkAuth() {
         $userLogin = Session::data('user_login');
         $auth = [];
         if (!empty($userLogin)) {
             $userModel = Load::model('User');
+            // Lấy thông tin user đăng nhập
             $user = $userModel->getUser($userLogin['id']);
-            if (!empty($user) && $user['status']) {
+
+            // Kiểm tra
+            if (!empty($user) && $user['status'] && Session::id() == $user['session_id']) {
                 // Hoạt động
                 $auth = $user;
             }
