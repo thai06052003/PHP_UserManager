@@ -40,6 +40,7 @@ class AuthController extends Controller
                 } else {
                     $passwordHash = $user['password'];
                     $verifyStatus = Hash::check($body['password'], $passwordHash);
+                    $request->setOld($body);
                     if (!$verifyStatus) {
                         // Error
                         Session::flash('msg', 'Email hoặc mật khẩu không chính xác');
@@ -254,6 +255,7 @@ class AuthController extends Controller
                     // Error
                     Session::flash('msg', 'Email không tồn tại trên hệ thống');
                     Session::flash('msg_type', 'error');
+                    $request->setOld($body);
                 } else {
                     // Success
                     $userId = $user['id'];

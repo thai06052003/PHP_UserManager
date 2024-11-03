@@ -2,7 +2,7 @@
 <form action="{{_WEB_ROOT.'/auth/do-login'}}" method="post">
     <div class="mb-3">
         <label for="email">Email</label>
-        <input type="email" name="email" id="email" class="form-control" placeholder="Nhập email..." autofocus>
+        <input type="email" name="email" id="email" class="form-control" placeholder="Nhập email..." value="{{old('email')}}" autofocus>
     </div>
 
     <div class="mb-3">
