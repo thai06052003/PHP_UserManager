@@ -16,3 +16,7 @@ $routes['auth/resend-active'] = 'authController/resendActive';
 $routes['auth/forgot-password'] = 'authController/forgotPassword';
 // Xử lí yêu cầu lấy lại mật khẩu
 $routes['auth/do-forgot-password'] = 'authController/handleForgotPassword';
+//
+$routes['auth/reset'] = 'authController/resetPassword';
+//
+$routes['auth/update-password'] = 'authController/updatePassword';

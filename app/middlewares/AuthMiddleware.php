@@ -18,6 +18,8 @@ class AuthMiddleware extends Middleware {
             '/auth/resend-active',
             '/auth/forgot-password',
             '/auth/do-forgot-password',
+            '/auth/reset',
+            '/auth/update-password',
         ];
 
         $auth = $this->checkAuth();
